@@ -8,9 +8,10 @@ class ViewController: UIViewController {
     // MARK: - Outlets
     
     private lazy var tableView: UITableView = {
-        let tableView = UITableView(frame: .zero, style: .plain)
+        let tableView = UITableView(frame: .zero, style: .insetGrouped)
         tableView.register(CustomTableViewCell.self, forCellReuseIdentifier: "cell")
         tableView.dataSource = self
+        tableView.delegate = self
         return tableView
     }()
     
@@ -23,7 +24,6 @@ class ViewController: UIViewController {
         return textField
     }()
     
-    
     // MARK: - Lifecycle
     
     override func viewDidLoad() {
@@ -34,6 +34,7 @@ class ViewController: UIViewController {
         setupHierarchy()
         setupLayout()
     }
+    
     // MARK: - Setup
     
     private func setupView() {
@@ -43,7 +44,6 @@ class ViewController: UIViewController {
     private func setupHierarchy(){
         view.addSubview(textField)
         view.addSubview(tableView)
-        
     }
     
     private func setupLayout(){
@@ -51,40 +51,48 @@ class ViewController: UIViewController {
             make.top.equalTo(view.safeAreaLayoutGuide)
             make.centerX.equalTo(view)
             make.left.equalTo(view).offset(20)
-            make.height.equalTo(40)
+            make.height.equalTo(30)
         }
-        
         tableView.snp.makeConstraints { make in
             make.top.equalTo(textField.snp.bottom).offset(20)
             make.right.bottom.left.equalTo(view)
         }
     }
 }
-    
-    // MARK: - Actions
-    
-    extension ViewController: UITableViewDataSource {
-        func numberOfSections(in tableView: UITableView) -> Int {
-            model.count
-        }
-        func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-            model[section].count
-        }
-        
-        func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-            let cell = tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath) as! CustomTableViewCell
-            let model = self.model[indexPath.section][indexPath.row]
-            cell.model = model
-            return cell
-        }
-        
-        func tableView(_tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
-            if editingStyle == .delete {
-                tableView.beginUpdates()
-                model.remove(at: indexPath.row)
-                tableView.deleteRows(at: [indexPath], with: .fade)
-                tableView.endUpdates()
-            }
-        }
+
+// MARK: - Actions
+
+extension ViewController: UITableViewDataSource {
+    func numberOfSections(in tableView: UITableView) -> Int {
+        model.count
     }
     
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        model[section].count
+    }
+    
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let cell = tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath) as! CustomTableViewCell
+        cell.model = self.model[indexPath.section][indexPath.row]
+        cell.accessoryType = .disclosureIndicator
+        return cell ?? UITableViewCell()
+    }
+    
+    func tableView(_tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
+        if editingStyle == .delete {
+            tableView.beginUpdates()
+            model.remove(at: indexPath.row)
+            tableView.deleteRows(at: [indexPath], with: .fade)
+            tableView.endUpdates()
+        }
+    }
+}
+
+extension ViewController: UITableViewDelegate {
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        tableView.deselectRow(at: indexPath, animated: true)
+        let viewController = DetailViewController()
+        viewController.model = model[indexPath.section][indexPath.row]
+        navigationController?.pushViewController(viewController, animated: true)
+    }
+}
