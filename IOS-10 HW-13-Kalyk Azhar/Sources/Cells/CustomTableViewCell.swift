@@ -1,6 +1,9 @@
 import UIKit
 
 class CustomTableViewCell: UITableViewCell {
+    
+    // MARK: - Elements
+    
     private let iconBackgroundView = UIView()
     private let iconImageView = UIImageView()
     private let titleLabel = UILabel()
@@ -14,13 +17,15 @@ class CustomTableViewCell: UITableViewCell {
                 titleLabel.text = model.title
                 iconBackgroundView.backgroundColor = model.backgroundColor
                 
-                switch model.optionType {
-                case .switched:
+                switch model.cellType {
+                case .switchCell:
                     switchButton.isHidden = false
-                    switchButton.isOn = true
-                default:
+                    switchButton.isOn = false
+                    accessoryType = .none
+                case .detailCell:
                     switchButton.isHidden = true
                     switchButton.isOn = false
+                    accessoryType = .disclosureIndicator
                 }
             } else {
                 iconImageView.image = nil
@@ -28,28 +33,37 @@ class CustomTableViewCell: UITableViewCell {
                 iconBackgroundView.backgroundColor = nil
                 switchButton.isHidden = true
                 switchButton.isOn = false
+                accessoryType = .none
             }
         }
     }
     
-    private func isSwitchVisible(for model: Model) -> Bool {
-        return model.title == "Авиарежим" || model.title == "VPN"
-    }
+    // MARK: - Init
     
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         
-        iconImageView.contentMode = .scaleAspectFit
-        iconImageView.clipsToBounds = true
-        iconBackgroundView.addSubview(iconImageView)
-        contentView.addSubview(iconBackgroundView)
-        contentView.addSubview(titleLabel)
-        contentView.addSubview(switchButton)
+        setupView()
+        setupHierarchy()
         setupLayout()
     }
     
     required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+    
+    // MARK: - Setup
+    
+    private func setupView() {
+        iconImageView.contentMode = .scaleAspectFit
+        iconImageView.clipsToBounds = true
+    }
+    
+    private func setupHierarchy(){
+        iconBackgroundView.addSubview(iconImageView)
+        contentView.addSubview(iconBackgroundView)
+        contentView.addSubview(titleLabel)
+        contentView.addSubview(switchButton)
     }
     
     private func setupLayout() {
