@@ -1,63 +1,39 @@
 import UIKit
-import SnapKit
 
 class ViewController: UIViewController {
     
-    private var model = Model.allModels
-    
     // MARK: - Elements
     
-    private lazy var tableView: UITableView = {
-        let tableView = UITableView(frame: .zero, style: .insetGrouped)
-        tableView.register(CustomTableViewCell.self, forCellReuseIdentifier: "cell")
-        tableView.dataSource = self
-        tableView.delegate = self
-        return tableView
-    }()
-    
-    private lazy var textField: UITextField = {
-        let textField = UITextField()
-        textField.backgroundColor = .systemGray6
-        textField.layer.cornerRadius = 20
-        textField.textAlignment = .center
-        textField.placeholder = "Type name here..."
-        return textField
-    }()
+    private var mainView = MainView()
+    private var model: [[Model]] = Model.allModels
     
     // MARK: - Lifecycle
     
+    override func loadView() {
+        view = mainView
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
-        setupView()
-        setupHierarchy()
-        setupLayout()
-    }
-    
-    // MARK: - Setup
-    
-    private func setupView() {
         title = "Настройки"
         navigationController?.navigationBar.prefersLargeTitles = true
-        view.backgroundColor = .white
+        
+        viewConfiguration()
+        
+    }
+}
+
+
+// MARK: - Configuration
+
+private extension ViewController {
+    
+    private func viewConfiguration() {
+        mainView.tableView.dataSource = self
+        mainView.tableView.delegate = self
+        
     }
     
-    private func setupHierarchy() {
-        view.addSubview(textField)
-        view.addSubview(tableView)
-    }
-    
-    private func setupLayout() {
-        textField.snp.makeConstraints { make in
-            make.top.equalTo(view.safeAreaLayoutGuide)
-            make.centerX.equalTo(view)
-            make.left.equalTo(view).offset(20)
-            make.height.equalTo(30)
-        }
-        tableView.snp.makeConstraints { make in
-            make.top.equalTo(textField.snp.bottom).offset(20)
-            make.right.bottom.left.equalTo(view)
-        }
-    }
 }
 
 // MARK: - UITableViewDataSource
@@ -95,3 +71,4 @@ extension ViewController: UITableViewDelegate {
         navigationController?.pushViewController(viewController, animated: true)
     }
 }
+
